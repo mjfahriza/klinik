@@ -88,7 +88,11 @@ if (isset($_POST['tambah_berobat'])) {
 
     $No_Transaksi = $_POST['No_Transaksi'];
     $Pasien_ID = $_POST['Pasien_ID'];
-    $Tanggal_Berobat = $_POST['Tanggal_Berobat'];
+    $Tanggal = $_POST['Tanggal'];
+    $Bulan = $_POST['Bulan'];
+    $Tahun = $_POST['Tahun'];
+
+    $Tanggal_Berobat = $Tahun . '-' . $Bulan . '-' . $Tanggal;
     $Dokter_ID = $_POST['Dokter_ID'];
     $Keluhan = $_POST['Keluhan'];
     $Biaya_Adm = $_POST['Biaya_Adm'];
@@ -463,6 +467,18 @@ $dokter_form = mysqli_query($koneksi, "
             Laporan
         </a>
 
+        <a href="list_dokter.php">
+            List Dokter
+        </a>
+
+        <a href="list_pasien.php">
+            List Pasien
+        </a>
+
+        <a href="list_berobat.php">
+            List Data Berobat
+        </a>
+
     </div>
 
 </div>
@@ -805,16 +821,72 @@ $dokter_form = mysqli_query($koneksi, "
             <div class="form-group">
 
                 <label>
-                    Tanggal Berobat
+                    Tanggal
                 </label>
 
-                <input
-                    type="date"
-                    name="Tanggal_Berobat"
-                    required
-                >
+                <select name="Tanggal" required>
+
+                    <option value="">
+                        -- Pilih Tanggal --
+                    </option>
+
+                    <?php for ($i = 1; $i <= 31; $i++) { ?>
+
+                        <option value="<?= str_pad($i, 2, '0', STR_PAD_LEFT); ?>">
+                            <?= $i; ?>
+                        </option>
+
+                    <?php } ?>
+
+                </select>
 
             </div>
+
+
+<div class="form-group">
+
+    <label>
+        Bulan
+    </label>
+
+    <select name="Bulan" required>
+
+        <option value="">
+            -- Pilih Bulan --
+        </option>
+
+        <option value="01">Januari</option>
+        <option value="02">Februari</option>
+        <option value="03">Maret</option>
+        <option value="04">April</option>
+        <option value="05">Mei</option>
+        <option value="06">Juni</option>
+        <option value="07">Juli</option>
+        <option value="08">Agustus</option>
+        <option value="09">September</option>
+        <option value="10">Oktober</option>
+        <option value="11">November</option>
+        <option value="12">Desember</option>
+
+    </select>
+
+</div>
+
+
+<div class="form-group">
+
+    <label>
+        Tahun
+    </label>
+
+    <input
+        type="number"
+        name="Tahun"
+        placeholder="Contoh: 2026"
+        required
+    >
+
+</div>
 
 
             <div class="form-group">

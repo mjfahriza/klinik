@@ -2,14 +2,77 @@
 
 include "koneksi.php";
 
+
+/* =========================================================
+   AMBIL DATA BEROBAT
+   ========================================================= */
+
+$No_Transaksi = $_GET['id'];
+
+$query_data = mysqli_query($koneksi, "
+    SELECT *
+    FROM berobat
+    WHERE No_Transaksi = '$No_Transaksi'
+");
+
+$data = mysqli_fetch_assoc($query_data);
+
+if (!$data) {
+    die("Data berobat tidak ditemukan.");
+}
+
+
+/* =========================================================
+   PECAH TANGGAL
+   ========================================================= */
+
+$tanggal_lama = $data['Tanggal_Berobat'];
+
+$Tanggal = date('d', strtotime($tanggal_lama));
+$Bulan = date('m', strtotime($tanggal_lama));
+$Tahun = date('Y', strtotime($tanggal_lama));
+
+
+/* =========================================================
+   DATA PASIEN
+   ========================================================= */
+
+$pasien_form = mysqli_query($koneksi, "
+    SELECT *
+    FROM pasien
+    ORDER BY Pasien_ID
+");
+
+
+/* =========================================================
+   DATA DOKTER
+   ========================================================= */
+
+$dokter_form = mysqli_query($koneksi, "
+    SELECT *
+    FROM dokter
+    ORDER BY Nama_Dokter
+");
+
+
+/* =========================================================
+   PROSES UPDATE
+   ========================================================= */
+
 if (isset($_POST['update_berobat'])) {
 
-    $No_Transaksi = $_POST['No_Transaksi'];
     $Pasien_ID = $_POST['Pasien_ID'];
-    $Tanggal_Berobat = $_POST['Tanggal_Berobat'];
+
+    $Tanggal = $_POST['Tanggal'];
+    $Bulan = $_POST['Bulan'];
+    $Tahun = $_POST['Tahun'];
+
+    $Tanggal_Berobat = $Tahun . '-' . $Bulan . '-' . $Tanggal;
+
     $Dokter_ID = $_POST['Dokter_ID'];
     $Keluhan = $_POST['Keluhan'];
     $Biaya_Adm = $_POST['Biaya_Adm'];
+
 
     $query_update = mysqli_query($koneksi, "
         UPDATE berobat
@@ -22,38 +85,18 @@ if (isset($_POST['update_berobat'])) {
         WHERE No_Transaksi = '$No_Transaksi'
     ");
 
+
     if ($query_update) {
 
-        header("Location: index.php");
+        header("Location: index.php#berobat");
         exit;
 
     } else {
 
-        echo "Gagal mengupdate data: " . mysqli_error($koneksi);
+        echo "Gagal mengubah data: " . mysqli_error($koneksi);
 
     }
-}
 
-
-// Ambil ID transaksi dari URL
-$id = $_GET['id'];
-
-
-// Ambil data berobat berdasarkan ID
-$query = mysqli_query($koneksi, "
-    SELECT *
-    FROM berobat
-    WHERE No_Transaksi = '$id'
-");
-
-
-// Ambil hasil query
-$data = mysqli_fetch_assoc($query);
-
-
-// Kalau data tidak ditemukan
-if (!$data) {
-    die("Data tidak ditemukan.");
 }
 
 ?>
@@ -65,27 +108,36 @@ if (!$data) {
 
     <meta charset="UTF-8">
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Edit Data Berobat</title>
 
+
     <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             font-family: Arial, sans-serif;
             background: #f4f6fa;
+            color: #1f3f67;
             padding: 40px;
         }
 
         .container {
-            max-width: 700px;
+            max-width: 800px;
             margin: auto;
             background: white;
-            padding: 30px;
+            padding: 35px;
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.07);
         }
 
         h1 {
-            color: #203f67;
             margin-bottom: 30px;
         }
 
@@ -97,39 +149,41 @@ if (!$data) {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
-            color: #203f67;
         }
 
         input,
+        select,
         textarea {
             width: 100%;
-            padding: 13px;
+            padding: 12px;
             border: 1px solid #ccc;
             border-radius: 7px;
-            font-size: 16px;
-            box-sizing: border-box;
+            font-size: 15px;
         }
 
         textarea {
             min-height: 100px;
-        }
-
-        .btn {
-            padding: 13px 20px;
-            border: none;
-            border-radius: 7px;
-            cursor: pointer;
-            color: white;
-            font-size: 16px;
-            text-decoration: none;
+            resize: vertical;
         }
 
         .btn-simpan {
             background: #203f67;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 15px;
         }
 
         .btn-kembali {
+            display: inline-block;
             background: #777;
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 7px;
+            margin-left: 8px;
         }
 
     </style>
@@ -157,7 +211,6 @@ if (!$data) {
 
             <input
                 type="text"
-                name="No_Transaksi"
                 value="<?= $data['No_Transaksi']; ?>"
                 readonly
             >
@@ -168,13 +221,128 @@ if (!$data) {
         <div class="form-group">
 
             <label>
-                Pasien ID
+                Pasien
+            </label>
+
+            <select name="Pasien_ID" required>
+
+                <?php while ($pasien = mysqli_fetch_assoc($pasien_form)) { ?>
+
+                    <option
+                        value="<?= $pasien['Pasien_ID']; ?>"
+                        <?= ($pasien['Pasien_ID'] == $data['Pasien_ID']) ? 'selected' : ''; ?>
+                    >
+
+                        <?= $pasien['Pasien_ID']; ?>
+                        -
+                        <?= $pasien['Nama_Pasien']; ?>
+
+                    </option>
+
+                <?php } ?>
+
+            </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Tanggal
+            </label>
+
+            <select name="Tanggal" required>
+
+                <?php for ($i = 1; $i <= 31; $i++) { ?>
+
+                    <option
+                        value="<?= str_pad($i, 2, '0', STR_PAD_LEFT); ?>"
+                        <?= ($Tanggal == str_pad($i, 2, '0', STR_PAD_LEFT)) ? 'selected' : ''; ?>
+                    >
+
+                        <?= $i; ?>
+
+                    </option>
+
+                <?php } ?>
+
+            </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Bulan
+            </label>
+
+            <select name="Bulan" required>
+
+                <option value="01" <?= ($Bulan == '01') ? 'selected' : ''; ?>>
+                    Januari
+                </option>
+
+                <option value="02" <?= ($Bulan == '02') ? 'selected' : ''; ?>>
+                    Februari
+                </option>
+
+                <option value="03" <?= ($Bulan == '03') ? 'selected' : ''; ?>>
+                    Maret
+                </option>
+
+                <option value="04" <?= ($Bulan == '04') ? 'selected' : ''; ?>>
+                    April
+                </option>
+
+                <option value="05" <?= ($Bulan == '05') ? 'selected' : ''; ?>>
+                    Mei
+                </option>
+
+                <option value="06" <?= ($Bulan == '06') ? 'selected' : ''; ?>>
+                    Juni
+                </option>
+
+                <option value="07" <?= ($Bulan == '07') ? 'selected' : ''; ?>>
+                    Juli
+                </option>
+
+                <option value="08" <?= ($Bulan == '08') ? 'selected' : ''; ?>>
+                    Agustus
+                </option>
+
+                <option value="09" <?= ($Bulan == '09') ? 'selected' : ''; ?>>
+                    September
+                </option>
+
+                <option value="10" <?= ($Bulan == '10') ? 'selected' : ''; ?>>
+                    Oktober
+                </option>
+
+                <option value="11" <?= ($Bulan == '11') ? 'selected' : ''; ?>>
+                    November
+                </option>
+
+                <option value="12" <?= ($Bulan == '12') ? 'selected' : ''; ?>>
+                    Desember
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Tahun
             </label>
 
             <input
-                type="text"
-                name="Pasien_ID"
-                value="<?= $data['Pasien_ID']; ?>"
+                type="number"
+                name="Tahun"
+                value="<?= $Tahun; ?>"
                 required
             >
 
@@ -184,31 +352,25 @@ if (!$data) {
         <div class="form-group">
 
             <label>
-                Tanggal Berobat
+                Dokter
             </label>
 
-            <input
-                type="date"
-                name="Tanggal_Berobat"
-                value="<?= $data['Tanggal_Berobat']; ?>"
-                required
-            >
+            <select name="Dokter_ID" required>
 
-        </div>
+                <?php while ($dokter = mysqli_fetch_assoc($dokter_form)) { ?>
 
+                    <option
+                        value="<?= $dokter['Dokter_ID']; ?>"
+                        <?= ($dokter['Dokter_ID'] == $data['Dokter_ID']) ? 'selected' : ''; ?>
+                    >
 
-        <div class="form-group">
+                        <?= $dokter['Nama_Dokter']; ?>
 
-            <label>
-                Dokter ID
-            </label>
+                    </option>
 
-            <input
-                type="text"
-                name="Dokter_ID"
-                value="<?= $data['Dokter_ID']; ?>"
-                required
-            >
+                <?php } ?>
+
+            </select>
 
         </div>
 
@@ -246,15 +408,15 @@ if (!$data) {
         <button
             type="submit"
             name="update_berobat"
-            class="btn btn-simpan"
+            class="btn-simpan"
         >
-            Update Data
+            Simpan Perubahan
         </button>
 
 
         <a
-            href="index.php"
-            class="btn btn-kembali"
+            href="index.php#berobat"
+            class="btn-kembali"
         >
             Kembali
         </a>
