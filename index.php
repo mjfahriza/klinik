@@ -446,6 +446,7 @@ $dokter_form = mysqli_query($koneksi, "
 
     <div class="logo">
         🏥 KLINIK
+            <h3>MJ Fahriza</h3>
     </div>
 
     <div class="menu">
