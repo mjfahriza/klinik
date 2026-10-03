@@ -221,6 +221,13 @@ $dokter_form = mysqli_query($koneksi, "
         .menu a:hover {
             background: rgba(255,255,255,0.12);
         }
+        .menu-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #9fb0c5;
+            margin: 22px 10px 8px;
+            letter-spacing: 0.5px;
+        }
 
         /* CONTENT */
 
@@ -442,7 +449,9 @@ $dokter_form = mysqli_query($koneksi, "
     </div>
 
     <div class="menu">
-
+        <div class="menu-title">
+        DATA MASTER
+    </div>
         <a href="#dashboard">
             Dashboard
         </a>
@@ -464,8 +473,12 @@ $dokter_form = mysqli_query($koneksi, "
         </a>
 
         <a href="laporan.php">
-            Laporan
+            Laporan Transaksi
         </a>
+
+        <div class="menu-title">
+            DATA LAPORAN
+        </div>
 
         <a href="list_dokter.php">
             List Dokter
